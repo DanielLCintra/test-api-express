@@ -3,20 +3,51 @@ const app = express();
 const importData = require("./data.json");
 let port = process.env.PORT || 3000;
 
+const { Client } = require("pg");
+
+const client = new Client({
+  user: "jodhuqdbbqgmci",
+  host: "ec2-54-209-221-231.compute-1.amazonaws.com",
+  database: "dcha25fgn4f2je",
+  password: "468773b321e617a943aaaeabd032daed5e36ba60e54f76cf21eac9d8751dd18b",
+  port: 5432,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
+
+client.connect();
+
 app.get("/", (req, res) => {
   res.send("A api em express está funcionando");
 });
 
 app.get("/users", (req, res) => {
-  res.send(importData);
+  client.query("SELECT * FROM users", (error, results) => {
+    if (error) {
+      throw error;
+    }
+    res.status(200).json(results.rows);
+  });
 });
 
 app.post("/users", (req, res) => {
-  //     user.add({});
-  console.log(req.body);
-  res.send("Usuário criado com sucesso!");
+  console.log("req", req.body);
 
-  res.status = 201;
+  //   client.query(
+  //     "insert into users ( name, telephone) values (" +
+  //       req.body.name +
+  //       "," +
+  //       req.body.telephone +
+  //       ")",
+  //     (error, results) => {
+  //       if (error) {
+  //         throw error;
+  //       }
+  //       // res.status(200).json(results.rows);
+  //       res.send("Usuário criado com sucesso!");
+  //     }
+  //   );
 });
 
 app.put("/users/:id", (req, res) => {
