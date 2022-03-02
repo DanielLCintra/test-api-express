@@ -24,7 +24,7 @@ const client = new Client({
 client.connect();
 
 app.get("/", (req, res) => {
-  res.send("A api em express está funcionando");
+  res.send("A api em express está funcionando"); 
 });
 
 app.get("/users", (req, res) => {
