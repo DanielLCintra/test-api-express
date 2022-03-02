@@ -1,6 +1,11 @@
 const express = require("express");
 const app = express();
 const importData = require("./data.json");
+
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false}));
+
 let port = process.env.PORT || 3000;
 
 const { Client } = require("pg");
@@ -32,50 +37,56 @@ app.get("/users", (req, res) => {
 });
 
 app.post("/users", (req, res) => {
-  console.log("req", req.body);
-
-  //   client.query(
-  //     "insert into users ( name, telephone) values (" +
-  //       req.body.name +
-  //       "," +
-  //       req.body.telephone +
-  //       ")",
-  //     (error, results) => {
-  //       if (error) {
-  //         throw error;
-  //       }
-  //       // res.status(200).json(results.rows);
-  //       res.send("Usuário criado com sucesso!");
-  //     }
-  //   );
+client.query(
+  "insert into users(name, telephone)values('"+ req.body.name + "','"+ req.body.telephone + "')"
+    , (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.status(200).json("Usuário inserido com sucesso");
+    }
+  )
 });
 
 app.put("/users/:id", (req, res) => {
-  //     const user = users.find(id);
-  //     users.update(data);
-  console.log(req.body);
-  res.status = 202;
-  res.send("Usuário atualizado com sucesso!");
+  client.query(
+    'UPDATE users SET name = $1, telephone = $2 WHERE id = $3', [req.body.name, req.body.telephone, req.params.id]
+      , (error, results) => {
+        if (error) {
+          throw error;
+        }
+    console.log(req.body);
+    res.status = 202;
+    res.send("Usuário atualizado com sucesso!");
+    }
+  )
 });
 
 app.delete("/users/:id", (req, res) => {
-  res.status = 200;
-  res.send("Usuário excluído com sucesso!");
+  client.query(
+    'delete from users where id = $1', [req.params.id]
+    , (error, results) => {
+      if (error) {
+        throw error;
+      }
+    res.status = 200;
+    res.send("Usuário excluído com sucesso!");
+  }
+)
 });
 
 app.get("/users/:id", (req, res) => {
-  const users = [
-    { id: "1", nome: "Daniel", telefone: "(11)93390-6518" },
-    { id: "2", nome: "Clovis", telefone: "(11)090999-6518" },
-  ];
-
-  const user = users.find((user) => user.id === req.params.id);
-  const message = "Usuário localizado";
-
-  res.status = 200;
-  res.send({ message, user });
+  client.query(
+    'select * from users where id = $1', [req.params.id]
+    , (error, results) => {
+      if (error) {
+        throw error;
+      }
+    res.status(200).json(results.rows);
+  }
+)
 });
 
 app.listen(port, () => {
-  console.log("A api está funcionando na porta" + port);
+  console.log("A api está funcionando na porta: " + port);
 });
